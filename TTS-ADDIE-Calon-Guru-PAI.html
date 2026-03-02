@@ -563,39 +563,6 @@ body {
       <label>NIM / ID Mahasiswa</label>
       <input type="text" id="inputNIM" placeholder="Contoh: 2024010001">
     </div>
-    <div class="form-group">
-      <label>Kelas / Semester</label>
-      <select id="inputKelas">
-        <option value="">— Pilih Kelas —</option>
-        <option value="PAI-A Semester 3">PAI-A Semester 3</option>
-        <option value="PAI-B Semester 3">PAI-B Semester 3</option>
-        <option value="PAI-A Semester 5">PAI-A Semester 5</option>
-        <option value="PAI-B Semester 5">PAI-B Semester 5</option>
-        <option value="PAI-A Semester 7">PAI-A Semester 7</option>
-        <option value="PAI-B Semester 7">PAI-B Semester 7</option>
-        <option value="Lainnya">Lainnya</option>
-      </select>
-    </div>
-
-    <div class="integration-panel">
-      <h3>⚙️ Integrasi (Opsional)</h3>
-      <div class="form-group">
-        <label>Google Sheets URL / ID</label>
-        <input type="text" id="inputSheetId" placeholder="Paste Google Sheet ID atau URL">
-      </div>
-      <div class="form-group">
-        <label>GitHub Repository</label>
-        <input type="text" id="inputGithubRepo" placeholder="username/repo-name">
-      </div>
-      <div class="form-group">
-        <label>GitHub Token (PAT)</label>
-        <input type="password" id="inputGithubToken" placeholder="ghp_xxxxxxxxxxxx">
-      </div>
-      <p style="font-size:11px;color:#999;margin-top:4px;">
-        Google Sheet harus di-<em>publish to web</em> (CSV). GitHub Token memerlukan izin <code>repo</code> untuk push skor.
-      </p>
-    </div>
-
     <button class="btn btn-primary" onclick="startGame()" style="margin-top:20px;">
       ▶ Mulai Teka-Teki Silang
     </button>
@@ -660,7 +627,6 @@ body {
     <div class="result-details" id="resultDetails"></div>
     <div style="display:flex;gap:8px;justify-content:center;margin-top:16px;">
       <button class="btn btn-primary btn-sm" onclick="submitToSheets()">📊 Kirim ke Google Sheets</button>
-      <button class="btn btn-secondary btn-sm" onclick="submitToGithub()">🐙 Push ke GitHub</button>
     </div>
     <div id="integrationStatus" style="margin-top:12px;font-size:12px;color:#666;"></div>
     <div class="leaderboard" id="leaderboard"></div>
@@ -730,9 +696,11 @@ const CROSSWORD_DATA = {
 // ============================================================
 // GAME STATE
 // ============================================================
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwdC_Dw6zaNe9PofOmbvQylIjHUkpoKhR4ZdDkzD_R58BhnbGqnv2mD44ZuzDdyE-7o/exec';
+
 let gameState = {
-  user: { nama: '', nim: '', kelas: '' },
-  config: { sheetId: '', githubRepo: '', githubToken: '' },
+  user: { nama: '', nim: '', kelas: '-' },
+  config: { sheetId: SHEETS_URL, githubRepo: '', githubToken: '' },
   grid: [],
   cellMap: {},
   activeWord: null,
@@ -752,22 +720,21 @@ let gameState = {
 function startGame() {
   const nama = document.getElementById('inputNama').value.trim();
   const nim = document.getElementById('inputNIM').value.trim();
-  const kelas = document.getElementById('inputKelas').value;
   
-  if (!nama || !nim || !kelas) {
-    showToast('Mohon lengkapi Nama, NIM, dan Kelas');
+  if (!nama || !nim) {
+    showToast('Mohon lengkapi Nama dan NIM');
     return;
   }
   
-  gameState.user = { nama, nim, kelas };
+  gameState.user = { nama, nim, kelas: '-' };
   gameState.config = {
-    sheetId: document.getElementById('inputSheetId').value.trim(),
-    githubRepo: document.getElementById('inputGithubRepo').value.trim(),
-    githubToken: document.getElementById('inputGithubToken').value.trim()
+    sheetId: SHEETS_URL,
+    githubRepo: '',
+    githubToken: ''
   };
   
   document.getElementById('displayName').textContent = nama;
-  document.getElementById('displayNIM').textContent = `${nim} • ${kelas}`;
+  document.getElementById('displayNIM').textContent = nim;
   document.getElementById('userAvatar').textContent = nama.charAt(0).toUpperCase();
   
   buildGrid();
@@ -1145,7 +1112,6 @@ function finishGame() {
   document.getElementById('resultDetails').innerHTML = `
     <div><span>Nama</span><strong>${gameState.user.nama}</strong></div>
     <div><span>NIM</span><strong>${gameState.user.nim}</strong></div>
-    <div><span>Kelas</span><strong>${gameState.user.kelas}</strong></div>
     <div><span>Soal Terjawab</span><strong>${solved} / ${total}</strong></div>
     <div><span>Petunjuk Digunakan</span><strong>${gameState.hintsUsed}x</strong></div>
     <div><span>Waktu</span><strong>${minutes}m ${seconds}s</strong></div>
@@ -1157,6 +1123,9 @@ function finishGame() {
   
   document.getElementById('gameScreen').classList.add('hidden');
   document.getElementById('resultScreen').classList.remove('hidden');
+  
+  // Auto-submit to Google Sheets
+  submitToSheets();
 }
 
 // ============================================================
