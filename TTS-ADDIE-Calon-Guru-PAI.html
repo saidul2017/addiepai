@@ -229,6 +229,13 @@ body {
 @media (max-width: 900px) {
   .main-layout { grid-template-columns: 1fr; }
 }
+@media (max-width: 600px) {
+  :root {
+    --cell-size: 22px;
+  }
+  .cell input { font-size: 10px; }
+  .cell-number { font-size: 6px; }
+}
 
 /* Crossword Grid */
 .crossword-panel {
@@ -669,7 +676,7 @@ body {
 // ============================================================
 const CROSSWORD_DATA = {
   // Grid size
-  rows: 28,
+  rows: 30,
   cols: 28,
   
   // Words with positions
@@ -735,7 +742,8 @@ let gameState = {
   startTime: null,
   timerInterval: null,
   elapsed: 0,
-  leaderboard: []
+  leaderboard: [],
+  finished: false
 };
 
 // ============================================================
@@ -1078,10 +1086,13 @@ function markWordSolved(word, earnedPoints) {
 
 function updateStats() {
   const solved = gameState.solvedWords.size;
-  const score = Math.max(0, (solved * 2.5) - (gameState.hintsUsed * 1.25));
+  const total = CROSSWORD_DATA.words.length;
+  const baseScore = (solved / total) * 100;
+  const hintPenalty = gameState.hintsUsed * 2.5;
+  const score = Math.round(Math.max(0, Math.min(100, baseScore - hintPenalty)));
   
   document.getElementById('statSolved').textContent = solved;
-  document.getElementById('statScore').textContent = Math.round(score);
+  document.getElementById('statScore').textContent = score;
 }
 
 function calculateFinalScore() {
@@ -1110,6 +1121,8 @@ function updateTimer() {
 // FINISH GAME
 // ============================================================
 function finishGame() {
+  if (gameState.finished) return;
+  gameState.finished = true;
   clearInterval(gameState.timerInterval);
   checkAllAnswers();
   
@@ -1266,14 +1279,14 @@ function doPost(e) {
     try {
       const resp = await fetch(sheetInput, {
         method: 'POST',
+        mode: 'no-cors',
         body: JSON.stringify(rowData),
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'text/plain' }
       });
-      if (resp.ok) {
-        showToast('✅ Data berhasil dikirim ke Google Sheets!');
-        statusEl.querySelector('.status-dot').className = 'status-dot status-connected';
-        statusEl.querySelector('p').innerHTML = '<span class="status-dot status-connected"></span>Google Sheets: Terkirim ✅';
-      }
+      // With no-cors mode, response is opaque; assume success if no exception
+      showToast('✅ Data berhasil dikirim ke Google Sheets!');
+      statusEl.querySelector('.status-dot').className = 'status-dot status-connected';
+      statusEl.querySelector('p').innerHTML = '<span class="status-dot status-connected"></span>Google Sheets: Terkirim ✅';
     } catch(err) {
       showToast('⚠️ Gagal mengirim otomatis. Gunakan cara manual.');
     }
@@ -1399,13 +1412,7 @@ async function updateGithubReadme(repo, token, score) {
   
   let readmeContent;
   if (existingContent.includes('| Nama | NIM |')) {
-    readmeContent = existingContent.replace(/(^\|.*\|$\n?)/gm, (match, p1, offset) => {
-      if (existingContent.indexOf(match) === existingContent.lastIndexOf('|---')) {
-        return match;
-      }
-      return match;
-    });
-    readmeContent = readmeContent.trim() + '\n' + newEntry + '\n';
+    readmeContent = existingContent.trim() + '\n' + newEntry + '\n';
   } else {
     readmeContent = `# 📊 Papan Skor TTS Model ADDIE
 ## Calon Guru Pendidikan Agama Islam
@@ -1463,6 +1470,7 @@ function resetGame() {
   gameState.hintsUsed = 0;
   gameState.elapsed = 0;
   gameState.activeWord = null;
+  gameState.finished = false;
   clearInterval(gameState.timerInterval);
   
   document.getElementById('resultScreen').classList.add('hidden');
