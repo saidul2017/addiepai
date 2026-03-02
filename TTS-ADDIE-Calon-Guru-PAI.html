@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TTS Model ADDIE - Calon Guru PAI</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --emerald: #0d6b4e;
+  --emerald-dark: #094d38;
+  --emerald-light: #e8f5f0;
+  --gold: #c8a52e;
+  --gold-light: #faf3d4;
+  --ink: #1a1a2e;
+  --paper: #fefdfb;
+  --correct: #2ecc71;
+  --wrong: #e74c3c;
+  --highlight: #3498db;
+  --cell-size: 32px;
+  --bg-pattern: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%230d6b4e' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Noto Sans', sans-serif;
+  background: var(--paper);
+  background-image: var(--bg-pattern);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, var(--emerald-dark) 0%, var(--emerald) 50%, #0a7d5a 100%);
+  color: white;
+  padding: 24px 20px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content: '﷽';
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Amiri', serif;
+  font-size: 18px;
+  opacity: 0.5;
+}
+.header h1 {
+  font-family: 'Amiri', serif;
+  font-size: 28px;
+  font-weight: 700;
+  margin-top: 20px;
+  letter-spacing: 1px;
+}
+.header .subtitle {
+  font-size: 13px;
+  opacity: 0.85;
+  margin-top: 6px;
+  font-weight: 400;
+}
+.header .badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 11px;
+  margin-top: 10px;
+  backdrop-filter: blur(4px);
+}
+
+/* Login Screen */
+.login-screen {
+  max-width: 460px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+.login-card {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  border: 1px solid rgba(13,107,78,0.1);
+}
+.login-card h2 {
+  font-family: 'Amiri', serif;
+  font-size: 22px;
+  color: var(--emerald-dark);
+  margin-bottom: 4px;
+}
+.login-card .login-desc {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 24px;
+}
+.form-group {
+  margin-bottom: 16px;
+}
+.form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--emerald-dark);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.form-group input, .form-group select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: 'Noto Sans', sans-serif;
+  transition: border-color 0.2s;
+  background: #fafafa;
+}
+.form-group input:focus, .form-group select:focus {
+  outline: none;
+  border-color: var(--emerald);
+  background: white;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Noto Sans', sans-serif;
+}
+.btn-primary {
+  background: var(--emerald);
+  color: white;
+  width: 100%;
+}
+.btn-primary:hover { background: var(--emerald-dark); transform: translateY(-1px); }
+.btn-secondary {
+  background: var(--gold-light);
+  color: var(--emerald-dark);
+  border: 1px solid var(--gold);
+}
+.btn-secondary:hover { background: var(--gold); color: white; }
+.btn-sm { padding: 8px 16px; font-size: 12px; }
+.btn-danger { background: var(--wrong); color: white; }
+.btn-danger:hover { background: #c0392b; }
+
+/* Main App Layout */
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+}
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  border: 1px solid rgba(13,107,78,0.08);
+}
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.user-avatar {
+  width: 36px; height: 36px;
+  background: var(--emerald);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 700; font-size: 14px;
+}
+.user-name { font-weight: 600; font-size: 14px; }
+.user-nim { font-size: 11px; color: #888; }
+
+.stats-bar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.stat-item {
+  text-align: center;
+}
+.stat-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--emerald);
+}
+.stat-label {
+  font-size: 10px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.timer {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--emerald-dark);
+  background: var(--emerald-light);
+  padding: 6px 14px;
+  border-radius: 8px;
+}
+
+/* Main Grid */
+.main-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 16px;
+}
+@media (max-width: 900px) {
+  .main-layout { grid-template-columns: 1fr; }
+}
+
+/* Crossword Grid */
+.crossword-panel {
+  background: white;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+  border: 1px solid rgba(13,107,78,0.08);
+  overflow-x: auto;
+}
+.crossword-grid-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 8px;
+}
+.crossword-grid {
+  display: inline-grid;
+  gap: 1px;
+  background: #333;
+  border: 2px solid #333;
+  border-radius: 4px;
+}
+.cell {
+  width: var(--cell-size);
+  height: var(--cell-size);
+  position: relative;
+  background: white;
+}
+.cell.black {
+  background: var(--ink);
+}
+.cell-number {
+  position: absolute;
+  top: 1px;
+  left: 2px;
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--emerald-dark);
+  line-height: 1;
+  z-index: 2;
+  pointer-events: none;
+}
+.cell input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  background: transparent;
+  color: var(--ink);
+  caret-color: var(--emerald);
+  padding: 0;
+}
+.cell input:focus {
+  outline: none;
+  background: rgba(13,107,78,0.08);
+}
+.cell.active-word {
+  background: var(--emerald-light);
+}
+.cell.active-cell {
+  background: rgba(13,107,78,0.2);
+}
+.cell.correct input { color: var(--correct); }
+.cell.wrong input { color: var(--wrong); }
+
+/* Clues Panel */
+.clues-panel {
+  background: white;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+  border: 1px solid rgba(13,107,78,0.08);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.clues-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 3px;
+}
+.clue-tab {
+  flex: 1;
+  padding: 8px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: transparent;
+  color: #666;
+  transition: all 0.2s;
+  font-family: 'Noto Sans', sans-serif;
+}
+.clue-tab.active {
+  background: var(--emerald);
+  color: white;
+}
+.clue-list {
+  list-style: none;
+}
+.clue-item {
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-bottom: 2px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  border-left: 3px solid transparent;
+}
+.clue-item:hover {
+  background: var(--emerald-light);
+}
+.clue-item.active {
+  background: var(--emerald-light);
+  border-left-color: var(--emerald);
+}
+.clue-item.solved {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+.clue-num {
+  font-weight: 700;
+  color: var(--emerald);
+  font-family: 'JetBrains Mono', monospace;
+  margin-right: 6px;
+  font-size: 11px;
+}
+
+/* Result Screen */
+.result-screen {
+  max-width: 560px;
+  margin: 30px auto;
+  padding: 0 20px;
+}
+.result-card {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  text-align: center;
+}
+.result-score {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 64px;
+  font-weight: 700;
+  color: var(--emerald);
+  margin: 16px 0;
+}
+.result-grade {
+  display: inline-block;
+  padding: 6px 20px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+.grade-a { background: #d4edda; color: #155724; }
+.grade-b { background: #cce5ff; color: #004085; }
+.grade-c { background: #fff3cd; color: #856404; }
+.grade-d { background: #f8d7da; color: #721c24; }
+
+.result-details {
+  text-align: left;
+  margin: 20px 0;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 10px;
+  font-size: 13px;
+}
+.result-details div {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid #eee;
+}
+.result-details div:last-child { border: none; }
+
+/* Leaderboard */
+.leaderboard {
+  margin-top: 20px;
+  padding: 16px;
+  background: var(--emerald-light);
+  border-radius: 10px;
+}
+.leaderboard h3 {
+  font-family: 'Amiri', serif;
+  color: var(--emerald-dark);
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+.lb-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.lb-table th {
+  background: var(--emerald);
+  color: white;
+  padding: 8px;
+  text-align: left;
+  font-weight: 600;
+}
+.lb-table th:first-child { border-radius: 6px 0 0 0; }
+.lb-table th:last-child { border-radius: 0 6px 0 0; }
+.lb-table td {
+  padding: 7px 8px;
+  border-bottom: 1px solid #ddd;
+  background: white;
+}
+.lb-table tr:last-child td:first-child { border-radius: 0 0 0 6px; }
+.lb-table tr:last-child td:last-child { border-radius: 0 0 6px 0; }
+.lb-rank { font-weight: 700; color: var(--gold); }
+
+/* Integration Panel */
+.integration-panel {
+  margin-top: 16px;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  border: 1px solid rgba(13,107,78,0.08);
+}
+.integration-panel h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--emerald-dark);
+}
+.integration-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.integration-row input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.status-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+.status-connected { background: var(--correct); }
+.status-disconnected { background: #ccc; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #aaa; }
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-in { animation: fadeIn 0.4s ease-out; }
+
+@keyframes pulse {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+.pulse { animation: pulse 0.3s ease; }
+
+/* Print */
+@media print {
+  .toolbar, .clues-panel, .btn { display: none; }
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--ink);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+  pointer-events: none;
+}
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>تقاطع الكلمات — Teka-Teki Silang</h1>
+  <div class="subtitle">Model ADDIE untuk Calon Guru Pendidikan Agama Islam</div>
+  <div class="badge">40 Soal • Desain Instruksional • Terintegrasi GitHub & Google Sheets</div>
+</div>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="login-screen animate-in">
+  <div class="login-card">
+    <h2>Assalamu'alaikum 👋</h2>
+    <p class="login-desc">Masukkan data diri Anda untuk memulai Teka-Teki Silang Model ADDIE</p>
+    <div class="form-group">
+      <label>Nama Lengkap</label>
+      <input type="text" id="inputNama" placeholder="Contoh: Ahmad Fauzi">
+    </div>
+    <div class="form-group">
+      <label>NIM / ID Mahasiswa</label>
+      <input type="text" id="inputNIM" placeholder="Contoh: 2024010001">
+    </div>
+    <div class="form-group">
+      <label>Kelas / Semester</label>
+      <select id="inputKelas">
+        <option value="">— Pilih Kelas —</option>
+        <option value="PAI-A Semester 3">PAI-A Semester 3</option>
+        <option value="PAI-B Semester 3">PAI-B Semester 3</option>
+        <option value="PAI-A Semester 5">PAI-A Semester 5</option>
+        <option value="PAI-B Semester 5">PAI-B Semester 5</option>
+        <option value="PAI-A Semester 7">PAI-A Semester 7</option>
+        <option value="PAI-B Semester 7">PAI-B Semester 7</option>
+        <option value="Lainnya">Lainnya</option>
+      </select>
+    </div>
+
+    <div class="integration-panel">
+      <h3>⚙️ Integrasi (Opsional)</h3>
+      <div class="form-group">
+        <label>Google Sheets URL / ID</label>
+        <input type="text" id="inputSheetId" placeholder="Paste Google Sheet ID atau URL">
+      </div>
+      <div class="form-group">
+        <label>GitHub Repository</label>
+        <input type="text" id="inputGithubRepo" placeholder="username/repo-name">
+      </div>
+      <div class="form-group">
+        <label>GitHub Token (PAT)</label>
+        <input type="password" id="inputGithubToken" placeholder="ghp_xxxxxxxxxxxx">
+      </div>
+      <p style="font-size:11px;color:#999;margin-top:4px;">
+        Google Sheet harus di-<em>publish to web</em> (CSV). GitHub Token memerlukan izin <code>repo</code> untuk push skor.
+      </p>
+    </div>
+
+    <button class="btn btn-primary" onclick="startGame()" style="margin-top:20px;">
+      ▶ Mulai Teka-Teki Silang
+    </button>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="gameScreen" class="app-container hidden">
+  <div class="toolbar">
+    <div class="user-info">
+      <div class="user-avatar" id="userAvatar">A</div>
+      <div>
+        <div class="user-name" id="displayName">-</div>
+        <div class="user-nim" id="displayNIM">-</div>
+      </div>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div class="stat-value" id="statSolved">0</div>
+        <div class="stat-label">Terjawab</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="statTotal">40</div>
+        <div class="stat-label">Total</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="statScore">0</div>
+        <div class="stat-label">Skor</div>
+      </div>
+    </div>
+    <div class="timer" id="timerDisplay">00:00</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="btn btn-secondary btn-sm" onclick="checkAllAnswers()">✓ Periksa</button>
+      <button class="btn btn-secondary btn-sm" onclick="revealCurrentWord()">💡 Petunjuk</button>
+      <button class="btn btn-danger btn-sm" onclick="finishGame()">⏹ Selesai</button>
+    </div>
+  </div>
+
+  <div class="main-layout">
+    <div class="crossword-panel">
+      <div class="crossword-grid-wrapper">
+        <div class="crossword-grid" id="crosswordGrid"></div>
+      </div>
+    </div>
+    <div class="clues-panel">
+      <div class="clues-tabs">
+        <button class="clue-tab active" onclick="switchTab('across',this)">→ Mendatar</button>
+        <button class="clue-tab" onclick="switchTab('down',this)">↓ Menurun</button>
+      </div>
+      <ul class="clue-list" id="acrossClues"></ul>
+      <ul class="clue-list hidden" id="downClues"></ul>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT SCREEN -->
+<div id="resultScreen" class="result-screen hidden">
+  <div class="result-card animate-in">
+    <h2 style="font-family:'Amiri',serif;color:var(--emerald-dark);">Hasil Akhir</h2>
+    <div class="result-score" id="finalScore">0</div>
+    <div class="result-grade" id="finalGrade">-</div>
+    <div class="result-details" id="resultDetails"></div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:16px;">
+      <button class="btn btn-primary btn-sm" onclick="submitToSheets()">📊 Kirim ke Google Sheets</button>
+      <button class="btn btn-secondary btn-sm" onclick="submitToGithub()">🐙 Push ke GitHub</button>
+    </div>
+    <div id="integrationStatus" style="margin-top:12px;font-size:12px;color:#666;"></div>
+    <div class="leaderboard" id="leaderboard"></div>
+    <button class="btn btn-secondary" style="margin-top:20px;width:100%;" onclick="resetGame()">🔄 Main Lagi</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// CROSSWORD DATA: 40 soal tentang Model ADDIE untuk calon guru PAI
+// ============================================================
+const CROSSWORD_DATA = {
+  // Grid size
+  rows: 28,
+  cols: 28,
+  
+  // Words with positions
+  words: [
+    // ACROSS (Mendatar) - 20 soal
+    { num: 1,  dir:'across', row:0,  col:0,  answer:'ANALISIS',    clue:'Tahap pertama dalam model ADDIE untuk mengidentifikasi kebutuhan pembelajaran' },
+    { num: 3,  dir:'across', row:2,  col:5,  answer:'DESAIN',      clue:'Tahap kedua ADDIE, menyusun cetak biru (blueprint) pembelajaran' },
+    { num: 5,  dir:'across', row:4,  col:0,  answer:'IMPLEMENTASI',clue:'Tahap pelaksanaan pembelajaran setelah bahan ajar dikembangkan' },
+    { num: 7,  dir:'across', row:6,  col:3,  answer:'EVALUASI',    clue:'Tahap penilaian efektivitas program pembelajaran dalam ADDIE' },
+    { num: 9,  dir:'across', row:8,  col:6,  answer:'FORMATIF',    clue:'Jenis evaluasi yang dilakukan selama proses berlangsung untuk perbaikan' },
+    { num: 11, dir:'across', row:10, col:0,  answer:'SUMATIF',     clue:'Jenis evaluasi yang dilakukan di akhir program untuk mengukur hasil keseluruhan' },
+    { num: 13, dir:'across', row:12, col:4,  answer:'KURIKULUM',   clue:'Perangkat rencana pengaturan mengenai tujuan, isi, dan bahan pelajaran' },
+    { num: 15, dir:'across', row:14, col:0,  answer:'KOMPETENSI',  clue:'Kemampuan yang harus dikuasai peserta didik setelah proses pembelajaran' },
+    { num: 17, dir:'across', row:16, col:7,  answer:'MEDIA',       clue:'Alat bantu yang digunakan untuk menyampaikan pesan pembelajaran' },
+    { num: 19, dir:'across', row:18, col:2,  answer:'TAKSONOMI',   clue:'Klasifikasi tujuan pendidikan oleh Bloom yang digunakan dalam tahap desain' },
+    { num: 21, dir:'across', row:20, col:0,  answer:'STORYBOARD',  clue:'Rancangan visual alur media pembelajaran yang dibuat pada tahap desain' },
+    { num: 23, dir:'across', row:22, col:5,  answer:'VALIDASI',    clue:'Proses penilaian kelayakan produk oleh ahli sebelum uji coba' },
+    { num: 25, dir:'across', row:24, col:0,  answer:'PRETEST',     clue:'Tes awal sebelum pembelajaran untuk mengukur kemampuan awal siswa' },
+    { num: 27, dir:'across', row:26, col:3,  answer:'POSTTEST',    clue:'Tes akhir setelah pembelajaran untuk mengukur hasil belajar siswa' },
+    { num: 29, dir:'across', row:8,  col:16, answer:'MODUL',       clue:'Bahan ajar tercetak yang dirancang untuk dipelajari secara mandiri' },
+    { num: 31, dir:'across', row:10, col:14, answer:'FLOWCHART',   clue:'Diagram alir yang menggambarkan urutan proses dalam pengembangan media' },
+    { num: 33, dir:'across', row:14, col:14, answer:'MULTIMEDIA',  clue:'Gabungan teks, gambar, audio, video dalam satu media pembelajaran' },
+    { num: 35, dir:'across', row:18, col:14, answer:'INTERAKTIF',  clue:'Sifat media yang memungkinkan komunikasi dua arah antara siswa dan media' },
+    { num: 37, dir:'across', row:22, col:14, answer:'PROTOTYPE',   clue:'Model awal produk yang dibuat sebelum versi final pada tahap development' },
+    { num: 39, dir:'across', row:26, col:14, answer:'REVISI',      clue:'Perbaikan produk berdasarkan masukan ahli dan hasil uji coba' },
+    
+    // DOWN (Menurun) - 20 soal
+    { num: 2,  dir:'down', row:0,  col:3,  answer:'INSTRUKSIONAL', clue:'Berkaitan dengan proses pembelajaran; ADDIE adalah model desain ___' },
+    { num: 4,  dir:'down', row:0,  col:7,  answer:'PENGEMBANGAN',  clue:'Tahap ketiga ADDIE yaitu proses pembuatan/produksi bahan ajar (Development)' },
+    { num: 6,  dir:'down', row:2,  col:10, answer:'TUJUAN',        clue:'Sasaran yang ingin dicapai dalam proses pembelajaran, ditentukan di tahap desain' },
+    { num: 8,  dir:'down', row:4,  col:5,  answer:'MATERI',        clue:'Isi atau konten pelajaran yang disusun pada tahap pengembangan' },
+    { num: 10, dir:'down', row:6,  col:8,  answer:'LIKERT',        clue:'Skala pengukuran sikap 1-5 yang sering digunakan dalam angket validasi' },
+    { num: 12, dir:'down', row:0,  col:14, answer:'KEBUTUHAN',     clue:'Hal yang diidentifikasi pada tahap analisis: analisis ___' },
+    { num: 14, dir:'down', row:4,  col:11, answer:'EFEKTIF',       clue:'Sifat pembelajaran yang berhasil mencapai tujuan yang ditetapkan' },
+    { num: 16, dir:'down', row:8,  col:20, answer:'REMEDIAL',      clue:'Pembelajaran perbaikan bagi siswa yang belum mencapai KKM' },
+    { num: 18, dir:'down', row:12, col:6,  answer:'RPP',           clue:'Rencana Pelaksanaan Pembelajaran, dokumen yang disusun guru sebelum mengajar (singkatan)' },
+    { num: 20, dir:'down', row:10, col:17, answer:'PRAKTIS',       clue:'Kriteria produk: valid, ___, dan efektif (kemudahan penggunaan)' },
+    { num: 22, dir:'down', row:14, col:3,  answer:'PESERTADIDIK',  clue:'Subjek yang menjadi sasaran utama dalam proses pembelajaran (2 kata)' },
+    { num: 24, dir:'down', row:16, col:10, answer:'ANGKET',        clue:'Instrumen pengumpulan data berupa daftar pertanyaan tertulis' },
+    { num: 26, dir:'down', row:18, col:22, answer:'ITERATIF',      clue:'Sifat model ADDIE yang memungkinkan pengulangan tahap untuk perbaikan' },
+    { num: 28, dir:'down', row:12, col:12, answer:'SISTEMATIS',    clue:'Sifat model ADDIE yang terstruktur dan berurutan secara logis' },
+    { num: 30, dir:'down', row:16, col:8,  answer:'ANIMASI',       clue:'Media visual bergerak yang sering dikembangkan pada tahap development' },
+    { num: 32, dir:'down', row:14, col:19, answer:'KOGNITIF',      clue:'Ranah pengetahuan dalam taksonomi Bloom (C1-C6)' },
+    { num: 34, dir:'down', row:10, col:22, answer:'AFEKTIF',       clue:'Ranah sikap/nilai dalam taksonomi Bloom' },
+    { num: 36, dir:'down', row:20, col:5,  answer:'OBSERVASI',     clue:'Teknik pengumpulan data melalui pengamatan langsung' },
+    { num: 38, dir:'down', row:20, col:15, answer:'WAWANCARA',     clue:'Teknik pengumpulan data melalui tanya jawab langsung dengan responden' },
+    { num: 40, dir:'down', row:22, col:20, answer:'SKENARIO',      clue:'Urutan kegiatan pembelajaran yang dirancang pada tahap desain' },
+  ]
+};
+
+// ============================================================
+// GAME STATE
+// ============================================================
+let gameState = {
+  user: { nama: '', nim: '', kelas: '' },
+  config: { sheetId: '', githubRepo: '', githubToken: '' },
+  grid: [],
+  cellMap: {},
+  activeWord: null,
+  activeDir: 'across',
+  solvedWords: new Set(),
+  hintsUsed: 0,
+  startTime: null,
+  timerInterval: null,
+  elapsed: 0,
+  leaderboard: []
+};
+
+// ============================================================
+// INIT
+// ============================================================
+function startGame() {
+  const nama = document.getElementById('inputNama').value.trim();
+  const nim = document.getElementById('inputNIM').value.trim();
+  const kelas = document.getElementById('inputKelas').value;
+  
+  if (!nama || !nim || !kelas) {
+    showToast('Mohon lengkapi Nama, NIM, dan Kelas');
+    return;
+  }
+  
+  gameState.user = { nama, nim, kelas };
+  gameState.config = {
+    sheetId: document.getElementById('inputSheetId').value.trim(),
+    githubRepo: document.getElementById('inputGithubRepo').value.trim(),
+    githubToken: document.getElementById('inputGithubToken').value.trim()
+  };
+  
+  document.getElementById('displayName').textContent = nama;
+  document.getElementById('displayNIM').textContent = `${nim} • ${kelas}`;
+  document.getElementById('userAvatar').textContent = nama.charAt(0).toUpperCase();
+  
+  buildGrid();
+  buildClues();
+  
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('gameScreen').classList.remove('hidden');
+  document.getElementById('gameScreen').classList.add('animate-in');
+  
+  gameState.startTime = Date.now();
+  gameState.timerInterval = setInterval(updateTimer, 1000);
+}
+
+function buildGrid() {
+  const { rows, cols, words } = CROSSWORD_DATA;
+  
+  // Initialize grid
+  gameState.grid = Array.from({ length: rows }, () => Array(cols).fill(null));
+  gameState.cellMap = {};
+  
+  // Place words
+  words.forEach(w => {
+    for (let i = 0; i < w.answer.length; i++) {
+      const r = w.dir === 'across' ? w.row : w.row + i;
+      const c = w.dir === 'across' ? w.col + i : w.col;
+      gameState.grid[r][c] = { letter: w.answer[i], numbers: [], words: [] };
+      const key = `${r}-${c}`;
+      if (!gameState.cellMap[key]) gameState.cellMap[key] = { letter: w.answer[i], numbers: [], words: [] };
+      gameState.cellMap[key].words.push({ num: w.num, dir: w.dir, index: i });
+      if (i === 0) gameState.cellMap[key].numbers.push(w.num);
+    }
+  });
+  
+  // Render grid
+  const gridEl = document.getElementById('crosswordGrid');
+  gridEl.style.gridTemplateColumns = `repeat(${cols}, var(--cell-size))`;
+  gridEl.innerHTML = '';
+  
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const key = `${r}-${c}`;
+      const cellData = gameState.cellMap[key];
+      const div = document.createElement('div');
+      div.className = 'cell' + (cellData ? '' : ' black');
+      div.dataset.row = r;
+      div.dataset.col = c;
+      
+      if (cellData) {
+        if (cellData.numbers.length > 0) {
+          const numSpan = document.createElement('span');
+          numSpan.className = 'cell-number';
+          numSpan.textContent = cellData.numbers[0];
+          div.appendChild(numSpan);
+        }
+        const input = document.createElement('input');
+        input.maxLength = 1;
+        input.dataset.row = r;
+        input.dataset.col = c;
+        input.addEventListener('focus', () => onCellFocus(r, c));
+        input.addEventListener('input', (e) => onCellInput(e, r, c));
+        input.addEventListener('keydown', (e) => onCellKeydown(e, r, c));
+        div.appendChild(input);
+      }
+      gridEl.appendChild(div);
+    }
+  }
+}
+
+function buildClues() {
+  const acrossEl = document.getElementById('acrossClues');
+  const downEl = document.getElementById('downClues');
+  acrossEl.innerHTML = '';
+  downEl.innerHTML = '';
+  
+  CROSSWORD_DATA.words.forEach(w => {
+    const li = document.createElement('li');
+    li.className = 'clue-item';
+    li.id = `clue-${w.num}-${w.dir}`;
+    li.innerHTML = `<span class="clue-num">${w.num}.</span>${w.clue} <span style="color:#aaa;font-size:10px;">(${w.answer.length})</span>`;
+    li.onclick = () => focusWord(w);
+    
+    if (w.dir === 'across') acrossEl.appendChild(li);
+    else downEl.appendChild(li);
+  });
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function onCellFocus(r, c) {
+  const key = `${r}-${c}`;
+  const cellData = gameState.cellMap[key];
+  if (!cellData) return;
+  
+  // Find the word to highlight
+  const wordInfos = cellData.words;
+  let targetWord = null;
+  
+  // Prefer current direction
+  targetWord = wordInfos.find(w => w.dir === gameState.activeDir);
+  if (!targetWord) targetWord = wordInfos[0];
+  
+  gameState.activeDir = targetWord.dir;
+  const word = CROSSWORD_DATA.words.find(w => w.num === targetWord.num && w.dir === targetWord.dir);
+  highlightWord(word);
+  highlightClue(word);
+}
+
+function highlightWord(word) {
+  gameState.activeWord = word;
+  
+  // Remove all highlights
+  document.querySelectorAll('.cell').forEach(c => {
+    c.classList.remove('active-word', 'active-cell');
+  });
+  
+  // Add highlights
+  for (let i = 0; i < word.answer.length; i++) {
+    const r = word.dir === 'across' ? word.row : word.row + i;
+    const c = word.dir === 'across' ? word.col + i : word.col;
+    const cell = getCellEl(r, c);
+    if (cell) cell.classList.add('active-word');
+  }
+  
+  // Active cell
+  const focused = document.activeElement;
+  if (focused && focused.dataset && focused.dataset.row !== undefined) {
+    const fc = getCellEl(parseInt(focused.dataset.row), parseInt(focused.dataset.col));
+    if (fc) fc.classList.add('active-cell');
+  }
+}
+
+function highlightClue(word) {
+  document.querySelectorAll('.clue-item').forEach(c => c.classList.remove('active'));
+  const clueEl = document.getElementById(`clue-${word.num}-${word.dir}`);
+  if (clueEl) {
+    clueEl.classList.add('active');
+    clueEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function focusWord(word) {
+  gameState.activeDir = word.dir;
+  const input = getCellInput(word.row, word.col);
+  if (input) input.focus();
+  highlightWord(word);
+  highlightClue(word);
+  
+  // Switch tab
+  if (word.dir === 'across') switchTab('across', document.querySelectorAll('.clue-tab')[0]);
+  else switchTab('down', document.querySelectorAll('.clue-tab')[1]);
+}
+
+function onCellInput(e, r, c) {
+  const val = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
+  e.target.value = val;
+  
+  if (val) {
+    moveToNext(r, c);
+    checkWordCompletion();
+  }
+}
+
+function onCellKeydown(e, r, c) {
+  if (e.key === 'Backspace' && !e.target.value) {
+    e.preventDefault();
+    moveToPrev(r, c);
+  } else if (e.key === 'ArrowRight') {
+    e.preventDefault();
+    gameState.activeDir = 'across';
+    moveToNext(r, c);
+  } else if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    gameState.activeDir = 'across';
+    moveToPrev(r, c);
+  } else if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    gameState.activeDir = 'down';
+    moveToNext(r, c);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    gameState.activeDir = 'down';
+    moveToPrev(r, c);
+  } else if (e.key === 'Tab') {
+    e.preventDefault();
+    gameState.activeDir = gameState.activeDir === 'across' ? 'down' : 'across';
+    onCellFocus(r, c);
+  }
+}
+
+function moveToNext(r, c) {
+  const nr = gameState.activeDir === 'down' ? r + 1 : r;
+  const nc = gameState.activeDir === 'across' ? c + 1 : c;
+  const input = getCellInput(nr, nc);
+  if (input) input.focus();
+}
+
+function moveToPrev(r, c) {
+  const nr = gameState.activeDir === 'down' ? r - 1 : r;
+  const nc = gameState.activeDir === 'across' ? c - 1 : c;
+  const input = getCellInput(nr, nc);
+  if (input) {
+    input.focus();
+    input.value = '';
+  }
+}
+
+// ============================================================
+// CHECK & SCORE
+// ============================================================
+function checkWordCompletion() {
+  const word = gameState.activeWord;
+  if (!word) return;
+  
+  let complete = true;
+  let correct = true;
+  
+  for (let i = 0; i < word.answer.length; i++) {
+    const r = word.dir === 'across' ? word.row : word.row + i;
+    const c = word.dir === 'across' ? word.col + i : word.col;
+    const input = getCellInput(r, c);
+    if (!input || !input.value) { complete = false; break; }
+    if (input.value.toUpperCase() !== word.answer[i]) correct = false;
+  }
+  
+  if (complete && correct) {
+    const wordKey = `${word.num}-${word.dir}`;
+    if (!gameState.solvedWords.has(wordKey)) {
+      gameState.solvedWords.add(wordKey);
+      markWordSolved(word, true);
+      updateStats();
+      showToast(`✅ Benar! Soal ${word.num} terjawab`);
+    }
+  }
+}
+
+function checkAllAnswers() {
+  let newSolved = 0;
+  CROSSWORD_DATA.words.forEach(word => {
+    const wordKey = `${word.num}-${word.dir}`;
+    if (gameState.solvedWords.has(wordKey)) return;
+    
+    let complete = true;
+    let correct = true;
+    
+    for (let i = 0; i < word.answer.length; i++) {
+      const r = word.dir === 'across' ? word.row : word.row + i;
+      const c = word.dir === 'across' ? word.col + i : word.col;
+      const input = getCellInput(r, c);
+      const cell = getCellEl(r, c);
+      
+      if (!input || !input.value) { complete = false; continue; }
+      
+      if (input.value.toUpperCase() === word.answer[i]) {
+        cell.classList.add('correct');
+        cell.classList.remove('wrong');
+      } else {
+        cell.classList.add('wrong');
+        cell.classList.remove('correct');
+        correct = false;
+      }
+    }
+    
+    if (complete && correct) {
+      gameState.solvedWords.add(wordKey);
+      markWordSolved(word, true);
+      newSolved++;
+    }
+  });
+  
+  updateStats();
+  if (newSolved > 0) showToast(`✅ ${newSolved} soal baru terjawab benar!`);
+  else showToast('Periksa jawaban yang berwarna merah');
+  
+  if (gameState.solvedWords.size === CROSSWORD_DATA.words.length) {
+    setTimeout(finishGame, 1000);
+  }
+}
+
+function revealCurrentWord() {
+  const word = gameState.activeWord;
+  if (!word) { showToast('Pilih salah satu soal terlebih dahulu'); return; }
+  
+  gameState.hintsUsed++;
+  
+  for (let i = 0; i < word.answer.length; i++) {
+    const r = word.dir === 'across' ? word.row : word.row + i;
+    const c = word.dir === 'across' ? word.col + i : word.col;
+    const input = getCellInput(r, c);
+    if (input) {
+      input.value = word.answer[i];
+      getCellEl(r, c).classList.add('correct');
+    }
+  }
+  
+  const wordKey = `${word.num}-${word.dir}`;
+  gameState.solvedWords.add(wordKey);
+  markWordSolved(word, false);
+  updateStats();
+  showToast(`💡 Jawaban soal ${word.num}: ${word.answer} (petunjuk digunakan)`);
+}
+
+function markWordSolved(word, earnedPoints) {
+  for (let i = 0; i < word.answer.length; i++) {
+    const r = word.dir === 'across' ? word.row : word.row + i;
+    const c = word.dir === 'across' ? word.col + i : word.col;
+    const cell = getCellEl(r, c);
+    const input = getCellInput(r, c);
+    if (cell) cell.classList.add('correct');
+    if (input) input.disabled = true;
+  }
+  
+  const clueEl = document.getElementById(`clue-${word.num}-${word.dir}`);
+  if (clueEl) clueEl.classList.add('solved');
+}
+
+function updateStats() {
+  const solved = gameState.solvedWords.size;
+  const score = Math.max(0, (solved * 2.5) - (gameState.hintsUsed * 1.25));
+  
+  document.getElementById('statSolved').textContent = solved;
+  document.getElementById('statScore').textContent = Math.round(score);
+}
+
+function calculateFinalScore() {
+  const total = CROSSWORD_DATA.words.length;
+  const solved = gameState.solvedWords.size;
+  const baseScore = (solved / total) * 100;
+  const hintPenalty = gameState.hintsUsed * 2.5;
+  const timeBonusMax = 10;
+  const timeMinutes = gameState.elapsed / 60;
+  const timeBonus = Math.max(0, timeBonusMax - (timeMinutes / 6)); // lose bonus after 60 min
+  
+  return Math.round(Math.max(0, Math.min(100, baseScore - hintPenalty + timeBonus)));
+}
+
+// ============================================================
+// TIMER
+// ============================================================
+function updateTimer() {
+  gameState.elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+  const m = Math.floor(gameState.elapsed / 60).toString().padStart(2, '0');
+  const s = (gameState.elapsed % 60).toString().padStart(2, '0');
+  document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+}
+
+// ============================================================
+// FINISH GAME
+// ============================================================
+function finishGame() {
+  clearInterval(gameState.timerInterval);
+  checkAllAnswers();
+  
+  const score = calculateFinalScore();
+  const solved = gameState.solvedWords.size;
+  const total = CROSSWORD_DATA.words.length;
+  const minutes = Math.floor(gameState.elapsed / 60);
+  const seconds = gameState.elapsed % 60;
+  
+  let grade, gradeClass;
+  if (score >= 85) { grade = 'A — Mumtaz (Istimewa)'; gradeClass = 'grade-a'; }
+  else if (score >= 70) { grade = 'B — Jayyid Jiddan (Sangat Baik)'; gradeClass = 'grade-b'; }
+  else if (score >= 55) { grade = 'C — Jayyid (Baik)'; gradeClass = 'grade-c'; }
+  else { grade = 'D — Maqbul (Cukup)'; gradeClass = 'grade-d'; }
+  
+  document.getElementById('finalScore').textContent = score;
+  document.getElementById('finalGrade').textContent = grade;
+  document.getElementById('finalGrade').className = `result-grade ${gradeClass}`;
+  
+  document.getElementById('resultDetails').innerHTML = `
+    <div><span>Nama</span><strong>${gameState.user.nama}</strong></div>
+    <div><span>NIM</span><strong>${gameState.user.nim}</strong></div>
+    <div><span>Kelas</span><strong>${gameState.user.kelas}</strong></div>
+    <div><span>Soal Terjawab</span><strong>${solved} / ${total}</strong></div>
+    <div><span>Petunjuk Digunakan</span><strong>${gameState.hintsUsed}x</strong></div>
+    <div><span>Waktu</span><strong>${minutes}m ${seconds}s</strong></div>
+    <div><span>Skor Akhir</span><strong style="color:var(--emerald);font-size:16px;">${score}/100</strong></div>
+  `;
+  
+  // Save to local leaderboard
+  saveToLeaderboard(score);
+  
+  document.getElementById('gameScreen').classList.add('hidden');
+  document.getElementById('resultScreen').classList.remove('hidden');
+}
+
+// ============================================================
+// LEADERBOARD (Local)
+// ============================================================
+function saveToLeaderboard(score) {
+  try {
+    let lb = JSON.parse(localStorage.getItem('addie_tts_leaderboard') || '[]');
+    lb.push({
+      nama: gameState.user.nama,
+      nim: gameState.user.nim,
+      kelas: gameState.user.kelas,
+      score,
+      solved: gameState.solvedWords.size,
+      hints: gameState.hintsUsed,
+      time: gameState.elapsed,
+      date: new Date().toISOString()
+    });
+    lb.sort((a, b) => b.score - a.score);
+    lb = lb.slice(0, 20);
+    localStorage.setItem('addie_tts_leaderboard', JSON.stringify(lb));
+    renderLeaderboard(lb);
+  } catch(e) {
+    renderLeaderboard([{
+      nama: gameState.user.nama,
+      score,
+      solved: gameState.solvedWords.size,
+      date: new Date().toISOString()
+    }]);
+  }
+}
+
+function renderLeaderboard(lb) {
+  if (!lb || lb.length === 0) return;
+  const el = document.getElementById('leaderboard');
+  const rows = lb.slice(0, 10).map((item, i) => `
+    <tr>
+      <td class="lb-rank">${i+1}</td>
+      <td>${item.nama}</td>
+      <td>${item.score}</td>
+      <td>${item.solved || '-'}/40</td>
+      <td>${new Date(item.date).toLocaleDateString('id-ID')}</td>
+    </tr>
+  `).join('');
+  
+  el.innerHTML = `
+    <h3>🏆 Papan Peringkat</h3>
+    <table class="lb-table">
+      <thead><tr><th>#</th><th>Nama</th><th>Skor</th><th>Jawaban</th><th>Tanggal</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+// ============================================================
+// GOOGLE SHEETS INTEGRATION
+// ============================================================
+async function submitToSheets() {
+  const sheetInput = gameState.config.sheetId;
+  if (!sheetInput) {
+    showToast('⚠️ Google Sheet ID belum diisi. Masukkan ID saat login.');
+    return;
+  }
+  
+  // Extract sheet ID from URL if needed
+  let sheetId = sheetInput;
+  const match = sheetInput.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+  if (match) sheetId = match[1];
+  
+  const score = calculateFinalScore();
+  const rowData = {
+    timestamp: new Date().toISOString(),
+    nama: gameState.user.nama,
+    nim: gameState.user.nim,
+    kelas: gameState.user.kelas,
+    score: score,
+    solved: gameState.solvedWords.size,
+    total: CROSSWORD_DATA.words.length,
+    hints: gameState.hintsUsed,
+    time_seconds: gameState.elapsed
+  };
+  
+  // Using Google Apps Script Web App approach
+  // The user needs to deploy a simple Apps Script as web app connected to their sheet
+  const statusEl = document.getElementById('integrationStatus');
+  statusEl.innerHTML = `
+    <p><span class="status-dot status-disconnected"></span>Google Sheets: Menyiapkan data...</p>
+    <div style="margin-top:8px;padding:12px;background:#f5f5f5;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:11px;word-break:break-all;">
+      <strong>Data untuk Google Sheets:</strong><br>
+      ${Object.entries(rowData).map(([k,v]) => `${k}: ${v}`).join('<br>')}
+    </div>
+    <p style="margin-top:8px;font-size:11px;">
+      <strong>Cara integrasi Google Sheets:</strong><br>
+      1. Buka Google Sheet Anda<br>
+      2. Klik Extensions → Apps Script<br>
+      3. Paste kode berikut dan deploy sebagai Web App:<br>
+    </p>
+    <pre style="background:#1a1a2e;color:#eee;padding:12px;border-radius:8px;font-size:10px;overflow-x:auto;margin-top:6px;">
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var data = JSON.parse(e.postData.contents);
+  sheet.appendRow([
+    data.timestamp, data.nama, data.nim, 
+    data.kelas, data.score, data.solved,
+    data.total, data.hints, data.time_seconds
+  ]);
+  return ContentService.createTextOutput(
+    JSON.stringify({status: 'ok'})
+  ).setMimeType(ContentService.MimeType.JSON);
+}</pre>
+    <p style="margin-top:8px;font-size:11px;">
+      4. Setelah deploy, masukkan URL web app pada field Google Sheets saat login.<br>
+      5. Atau, copy data di atas dan paste manual ke sheet Anda.
+    </p>
+    <button class="btn btn-secondary btn-sm" onclick="copySheetData()" style="margin-top:8px;">📋 Copy Data (TSV)</button>
+  `;
+  
+  // Try to post if it looks like a web app URL
+  if (sheetInput.includes('script.google.com') || sheetInput.includes('macros')) {
+    try {
+      const resp = await fetch(sheetInput, {
+        method: 'POST',
+        body: JSON.stringify(rowData),
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (resp.ok) {
+        showToast('✅ Data berhasil dikirim ke Google Sheets!');
+        statusEl.querySelector('.status-dot').className = 'status-dot status-connected';
+        statusEl.querySelector('p').innerHTML = '<span class="status-dot status-connected"></span>Google Sheets: Terkirim ✅';
+      }
+    } catch(err) {
+      showToast('⚠️ Gagal mengirim otomatis. Gunakan cara manual.');
+    }
+  }
+}
+
+function copySheetData() {
+  const score = calculateFinalScore();
+  const tsv = [
+    new Date().toISOString(),
+    gameState.user.nama,
+    gameState.user.nim,
+    gameState.user.kelas,
+    score,
+    gameState.solvedWords.size,
+    CROSSWORD_DATA.words.length,
+    gameState.hintsUsed,
+    gameState.elapsed
+  ].join('\t');
+  
+  navigator.clipboard.writeText(tsv).then(() => {
+    showToast('📋 Data tersalin! Paste ke Google Sheet Anda.');
+  }).catch(() => {
+    showToast('Gagal menyalin. Silakan copy manual.');
+  });
+}
+
+// ============================================================
+// GITHUB INTEGRATION
+// ============================================================
+async function submitToGithub() {
+  const { githubRepo, githubToken } = gameState.config;
+  
+  if (!githubRepo || !githubToken) {
+    showToast('⚠️ GitHub repo dan token belum diisi.');
+    return;
+  }
+  
+  const score = calculateFinalScore();
+  const filename = `scores/${gameState.user.nim}_${Date.now()}.json`;
+  const content = JSON.stringify({
+    metadata: {
+      nama: gameState.user.nama,
+      nim: gameState.user.nim,
+      kelas: gameState.user.kelas,
+      tanggal: new Date().toISOString()
+    },
+    hasil: {
+      skor: score,
+      terjawab: gameState.solvedWords.size,
+      totalSoal: CROSSWORD_DATA.words.length,
+      petunjukDigunakan: gameState.hintsUsed,
+      waktuDetik: gameState.elapsed,
+      predikat: score >= 85 ? 'Mumtaz' : score >= 70 ? 'Jayyid Jiddan' : score >= 55 ? 'Jayyid' : 'Maqbul'
+    },
+    detailJawaban: CROSSWORD_DATA.words.map(w => ({
+      nomor: w.num,
+      arah: w.dir === 'across' ? 'mendatar' : 'menurun',
+      jawaban: w.answer,
+      terjawab: gameState.solvedWords.has(`${w.num}-${w.dir}`)
+    }))
+  }, null, 2);
+  
+  const statusEl = document.getElementById('integrationStatus');
+  
+  try {
+    showToast('🐙 Mengirim ke GitHub...');
+    
+    const resp = await fetch(`https://api.github.com/repos/${githubRepo}/contents/${filename}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${githubToken}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/vnd.github.v3+json'
+      },
+      body: JSON.stringify({
+        message: `📝 Skor TTS ADDIE: ${gameState.user.nama} (${score}/100)`,
+        content: btoa(unescape(encodeURIComponent(content)))
+      })
+    });
+    
+    if (resp.ok) {
+      const data = await resp.json();
+      showToast('✅ Skor berhasil di-push ke GitHub!');
+      statusEl.innerHTML += `
+        <p style="margin-top:8px;"><span class="status-dot status-connected"></span>GitHub: Push berhasil ✅</p>
+        <a href="${data.content.html_url}" target="_blank" style="font-size:12px;color:var(--emerald);">Lihat file di GitHub →</a>
+      `;
+    } else {
+      const err = await resp.json();
+      throw new Error(err.message);
+    }
+  } catch(err) {
+    showToast(`⚠️ GitHub error: ${err.message}`);
+    statusEl.innerHTML += `<p style="margin-top:8px;color:var(--wrong);font-size:12px;">GitHub error: ${err.message}</p>`;
+  }
+  
+  // Also update README leaderboard
+  try {
+    await updateGithubReadme(githubRepo, githubToken, score);
+  } catch(e) { /* silent */ }
+}
+
+async function updateGithubReadme(repo, token, score) {
+  const readmePath = 'README.md';
+  
+  // Try to get existing README
+  let existingSha = null;
+  let existingContent = '';
+  
+  try {
+    const resp = await fetch(`https://api.github.com/repos/${repo}/contents/${readmePath}`, {
+      headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      existingSha = data.sha;
+      existingContent = decodeURIComponent(escape(atob(data.content)));
+    }
+  } catch(e) {}
+  
+  const newEntry = `| ${gameState.user.nama} | ${gameState.user.nim} | ${gameState.user.kelas} | ${score} | ${gameState.solvedWords.size}/40 | ${new Date().toLocaleDateString('id-ID')} |`;
+  
+  let readmeContent;
+  if (existingContent.includes('| Nama | NIM |')) {
+    readmeContent = existingContent.replace(/(^\|.*\|$\n?)/gm, (match, p1, offset) => {
+      if (existingContent.indexOf(match) === existingContent.lastIndexOf('|---')) {
+        return match;
+      }
+      return match;
+    });
+    readmeContent = readmeContent.trim() + '\n' + newEntry + '\n';
+  } else {
+    readmeContent = `# 📊 Papan Skor TTS Model ADDIE
+## Calon Guru Pendidikan Agama Islam
+
+| Nama | NIM | Kelas | Skor | Terjawab | Tanggal |
+|------|-----|-------|------|----------|---------|
+${newEntry}
+`;
+  }
+  
+  const body = {
+    message: `📊 Update leaderboard: ${gameState.user.nama}`,
+    content: btoa(unescape(encodeURIComponent(readmeContent)))
+  };
+  if (existingSha) body.sha = existingSha;
+  
+  await fetch(`https://api.github.com/repos/${repo}/contents/${readmePath}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `token ${token}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/vnd.github.v3+json'
+    },
+    body: JSON.stringify(body)
+  });
+}
+
+// ============================================================
+// UTILITIES
+// ============================================================
+function getCellEl(r, c) {
+  return document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+}
+
+function getCellInput(r, c) {
+  return document.querySelector(`.cell[data-row="${r}"][data-col="${c}"] input`);
+}
+
+function switchTab(dir, btn) {
+  document.querySelectorAll('.clue-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('acrossClues').classList.toggle('hidden', dir !== 'across');
+  document.getElementById('downClues').classList.toggle('hidden', dir !== 'down');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function resetGame() {
+  gameState.solvedWords.clear();
+  gameState.hintsUsed = 0;
+  gameState.elapsed = 0;
+  gameState.activeWord = null;
+  clearInterval(gameState.timerInterval);
+  
+  document.getElementById('resultScreen').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+}
+</script>
+</body>
+</html>
